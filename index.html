@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Profit Game - Professional Banking</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="overlay">
+        <div class="auth-box">
+            <h1 class="logo">AR GAME <span style="font-size:0.5em; color:#6bc950">PRO</span></h1>
+
+            <div id="login-form-container">
+                <h2>تسجيل الدخول</h2>
+                <form id="login-form">
+                    <div class="input-group">
+                        <input type="text" id="loginIdentifier" placeholder=" " required>
+                        <label>البريد الإلكتروني / المعرف</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="loginPassword" placeholder=" " required>
+                        <label>كلمة المرور</label>
+                    </div>
+                    <button type="submit" class="submit-btn">دخول آمن</button>
+                    <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px">
+                        <button type="button" id="demo-btn" class="demo-btn">تجربة النظام (Demo)</button>
+                    </div>
+                </form>
+                <div class="auth-actions">
+                    <button id="show-register-btn" class="link-btn">إنشاء حساب جديد</button>
+                </div>
+            </div>
+
+            <div id="register-form-container" style="display:none;">
+                <h2>تسجيل عضوية جديدة</h2>
+                <form id="register-form">
+                    <div class="row">
+                        <input type="text" id="firstName" placeholder="الاسم الأول" required>
+                        <input type="text" id="lastName" placeholder="الاسم الأخير" required>
+                    </div>
+                    <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+                    <input type="password" id="password" placeholder="كلمة المرور" required>
+                    <button type="submit" class="submit-btn neon">تسجيل</button>
+                </form>
+                <div class="auth-actions">
+                    <button id="show-login-btn" class="link-btn">العودة لتسجيل الدخول</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Overlay (Blocks usage) -->
+    <div id="offline-overlay" class="overlay" style="display:none; z-index:10000; background:rgba(0,0,0,0.95);">
+        <div style="text-align:center; color:white;">
+            <div style="font-size:4rem;">📡</div>
+            <h2>انقطع الاتصال</h2>
+            <p>هذه اللعبة تتطلب اتصالاً دائماً بالإنترنت.</p>
+            <p style="color:#f59e0b; margin-top:10px;">جاري محاولة إعادة الاتصال...</p>
+        </div>
+    </div>
+
+    <!-- Main Game Interface -->
+    <div id="game-ui" style="display:none;">
+        <header class="top-bar">
+            <div class="user-block">
+                <div class="avatar">👤</div>
+                <div class="info">
+                    <span id="user-name">Guest</span>
+                    <span id="account-id" style="font-size:0.7rem; color:#888;">ID: 0000</span>
+                </div>
+            </div>
+
+            <div class="balance-card">
+                <span class="label">الرصيد المتاح</span>
+                <div class="value">
+                    <span id="balance-amount">0</span>
+                    <small>SYP</small>
+                </div>
+                <button id="open-bank-btn" class="deposit-icon-btn">+</button>
+            </div>
+
+            <button id="logout-btn" class="icon-btn">⏻</button>
+        </header>
+
+        <main class="game-container">
+            <div id="plinko-board-container">
+                <div id="plinko-board"></div> <!-- Pegs -->
+                <div id="ball-container"></div>
+            </div>
+
+            <div id="betting-sections"></div> <!-- Multipliers -->
+        </main>
+
+        <footer class="controls-bar">
+            <div class="bet-control">
+                <button id="decrease-bet" class="adj">-</button>
+                <div class="bet-input">
+                    <span style="font-size:0.7rem; color:#aaa">قيمة الرهان</span>
+                    <span id="current-bet">5000</span>
+                </div>
+                <button id="increase-bet" class="adj">+</button>
+            </div>
+
+            <button id="drop-ball-btn" class="play-btn">
+                PLAY
+            </button>
+        </footer>
+    </div>
+
+    <!-- Realistic Banking Portal -->
+    <div id="banking-modal" class="modal" style="display:none;">
+        <div class="banking-portal">
+            <div class="portal-sidebar">
+                <h3>المحفظة</h3>
+                <button class="nav-item active" data-view="deposit">📥 إيداع</button>
+                <button class="nav-item" data-view="withdraw">📤 سحب</button>
+                <button class="nav-item" data-view="history">📜 التاريخ</button>
+                <div class="portal-balance">
+                    <small>الرصيد الحالي</small>
+                    <span id="portal-balance">0 SYP</span>
+                </div>
+                <button class="close-modal-btn">إغلاق</button>
+            </div>
+
+            <div class="portal-content">
+
+                <!-- Deposit View -->
+                <div id="view-deposit" class="view-section">
+                    <h2>إيداع رصيد</h2>
+                    <div class="steps-indicator">
+                        <div class="step active">1. الطريقة</div>
+                        <div class="step">2. التحويل</div>
+                        <div class="step">3. التأكيد</div>
+                    </div>
+
+                    <!-- Step 1: Select Method -->
+                    <div id="deposit-step-1" class="step-content">
+                        <div class="methods-grid">
+                            <div class="payment-card" onclick="startDeposit('SyriaCash')">
+                                <span class="badge">الأسرع</span>
+                                <div class="icon sc">SC</div>
+                                <h4>SyriaTel Cash</h4>
+                                <p>فوري - 30 دقيقة</p>
+                            </div>
+                            <div class="payment-card" onclick="startDeposit('ShamCash')">
+                                <div class="icon sh">SH</div>
+                                <h4>Sham Cash</h4>
+                                <p>فوري - 30 دقيقة</p>
+                            </div>
+                            <div class="payment-card" onclick="startDeposit('Electronic')">
+                                <span class="badge" style="background:#5b21b6">رسمي</span>
+                                <div class="icon ep" style="background:#4c1d95">💳</div>
+                                <h4>الدفع الإلكتروني</h4>
+                                <p>بنكي - فوري</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Transfer Details -->
+                    <div id="deposit-step-2" class="step-content" style="display:none;">
+                        <div class="transfer-box">
+                            <p class="instruction">يرجى تحويل المبلغ المطلوب إلى الرقم التالي:</p>
+                            <div class="copy-box">
+                                <span class="label">رقم حساب الشركة:</span>
+                                <span id="company-account" class="code">0912345678</span>
+                                <button class="copy-btn">نسخ</button>
+                            </div>
+                            <div class="warning-box">
+                                ⚠ لديك 15 دقيقة لإتمام العملية.
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>المبلغ المراد إيداعه</label>
+                            <input type="number" id="dep-amount" placeholder="الحد الأدنى 10,000" min="10000">
+                        </div>
+                        <div class="form-group">
+                            <label>رقم حسابك المرسل (للتحقق)</label>
+                            <input type="text" id="dep-sender" placeholder="09xxxxxxxx">
+                        </div>
+
+                        <button class="next-btn" onclick="goToDepositStep(3)">متابعة</button>
+                        <button class="back-text-btn" onclick="goToDepositStep(1)">رجوع</button>
+                    </div>
+
+                    <!-- Step 3: Proof -->
+                    <div id="deposit-step-3" class="step-content" style="display:none;">
+                        <h3>تأكيد الدفع</h3>
+                        <p>يرجى رفع صورة إشعار التحويل لإتمام المطابقة.</p>
+
+                        <div class="upload-zone" id="upload-zone">
+                            <div class="icon">📁</div>
+                            <p>اضغط لرفع الصورة أو اسحب الملف هنا</p>
+                            <input type="file" id="file-proof" hidden>
+                        </div>
+
+                        <button class="confirm-pay-btn" onclick="submitDeposit()">تأكيد وإرسال</button>
+                        <button class="back-text-btn" onclick="goToDepositStep(2)">تعديل البيانات</button>
+                    </div>
+                </div>
+
+                <!-- Withdraw View -->
+                <div id="view-withdraw" class="view-section" style="display:none;">
+                    <h2>سحب الأرباح</h2>
+                    <p class="sub-text">سيتم تحويل المبلغ إلى حسابك خلال 1-24 ساعة.</p>
+
+                    <div class="form-group">
+                        <label>طريقة السحب</label>
+                        <select id="width-method">
+                            <option value="SyriaCash">SyriaTel Cash</option>
+                            <option value="ShamCash">Sham Cash</option>
+                            <option value="Electronic">دفع إلكتروني (بنكي)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>المبلغ (الحد الأدنى 10,000)</label>
+                        <input type="number" id="with-amount" placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label>رقم الحساب المستلم</label>
+                        <input type="text" id="with-account" placeholder="09xxxxxxxx">
+                    </div>
+
+                    <button class="confirm-pay-btn" onclick="submitWithdraw()">طلب سحب</button>
+                </div>
+
+                <!-- History View -->
+                <div id="view-history" class="view-section" style="display:none;">
+                    <h2>سجل العمليات</h2>
+                    <div class="transaction-list" id="trans-list">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
