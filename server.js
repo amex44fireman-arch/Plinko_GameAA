@@ -11,8 +11,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt'); // For password hashing
+const bcrypt = require('bcryptjs'); // Switched to bcryptjs for faster Render builds
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -90,4 +89,3 @@ app.post('/api/bank/withdraw', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 AR Game API Server running on port ${PORT}`);
 });
-
