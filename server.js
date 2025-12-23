@@ -53,6 +53,7 @@ app.post('/api/game/loss', (req, res) => {
 
     db.query(sql, [amount, ADMIN_WALLET_ID], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
+        if (!result || result.affectedRows === 0) return res.status(404).json({ error: 'Admin wallet not found' });
 
         console.log(`[HOUSE REVENUE] Transferred ${amount} SYP from User ${userId} to Admin`);
         res.json({ success: true, message: 'Revenue Secured' });
@@ -75,13 +76,17 @@ app.post('/api/bank/withdraw', (req, res) => {
 
     // Check balance first
     db.query('SELECT balance FROM users WHERE id = ?', [userId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!results || results.length === 0) return res.status(404).json({ error: 'User not found' });
+
         if (results[0].balance < amount) return res.status(400).json({ error: 'Insufficient funds' });
 
         // Deduct & Log
         const sql = `INSERT INTO transactions (user_id, type, amount, method, status) VALUES (?, 'withdraw', ?, ?, 'pending')`;
-        db.query(sql, [userId, amount, method]);
-
-        res.json({ status: 'pending' });
+        db.query(sql, [userId, amount, method], (err, result) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ status: 'pending', transactionId: result.insertId });
+        });
     });
 });
 
