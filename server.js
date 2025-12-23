@@ -30,6 +30,14 @@ const db = mysql.createConnection({
     database: process.env.DB_NAME || 'ar_game_db'
 });
 
+db.connect(err => {
+    if (err) {
+        console.error('❌ Database connection failed:', err.stack);
+        return;
+    }
+    console.log('✅ Connected to MySQL Database.');
+});
+
 // --- Config ---
 const ADMIN_WALLET_ID = 1; // The ID of your admin account in SQL
 
@@ -79,7 +87,7 @@ app.post('/api/bank/withdraw', (req, res) => {
 });
 
 // Start Server
-app.listen(3000, () => {
-    console.log('AR Game API Server running on port 3000');
-    console.log('Connect Client to: http://YOUR_VPS_IP:3000');
+app.listen(PORT, () => {
+    console.log(`🚀 AR Game API Server running on port ${PORT}`);
 });
+
