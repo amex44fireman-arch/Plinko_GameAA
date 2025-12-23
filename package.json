@@ -1,0 +1,14 @@
+{
+    "name": "ar-profit-game",
+    "version": "1.0.0",
+    "description": "Professional Plinko Game",
+    "main": "electron-main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "electron": "^25.0.0"
+    }
+}
